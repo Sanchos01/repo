@@ -30,7 +30,7 @@ defmodule Repo do
     end
   end
 
-  def update_one!(coll, filter, doc), do: Mongo.update_one!(:mongo, coll, filter, %{"$seT": doc}, pool: DBConnection.Poolboy)
+  def update_one!(coll, filter, doc), do: Mongo.update_one!(:mongo, coll, filter, %{"$set": doc}, pool: DBConnection.Poolboy)
   def update_one(coll, filter, doc) do
     case update_one!(coll, filter, doc) do
       %UpdateResult{modified_count: 1} -> :ok

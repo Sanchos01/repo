@@ -15,8 +15,8 @@ defmodule Repo do
   @spec insert_one!(coll, doc) :: any() | nil
   def insert_one!(coll, doc) do
     case Mongo.insert_one(:mongo, coll, doc, pool: DBConnection.Poolboy) do
-      {:ok, obj}        -> BSON.ObjectId.encode!(obj.inserted_id)
-      {:error, message} -> nil
+      {:ok, obj}         -> BSON.ObjectId.encode!(obj.inserted_id)
+      {:error, _message} -> nil
     end
   end
 

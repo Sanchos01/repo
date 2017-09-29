@@ -23,6 +23,7 @@ defmodule Repo.Mixfile do
     [
       {:mongodb, ">= 0.0.0"},
       {:poolboy, ">= 0.0.0"},
+      {:timex, "~> 3.1"},
     ]
   end
 end

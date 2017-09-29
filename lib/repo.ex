@@ -20,7 +20,7 @@ defmodule Repo do
     end
   end
 
-  @spec insert_one(coll, doc) :: result(Mongo.InsertOneResult.t)
+  @spec insert_one(coll, doc) :: {:ok, any()} | {:error, nil}
   def insert_one(coll, doc) do
     case insert_one!(coll, doc) do
       nil -> {:error, nil}
@@ -28,7 +28,7 @@ defmodule Repo do
     end
   end
 
-  @spec find_one(coll, doc, Keyword.t) :: nil | doc
+  @spec find_one(coll, doc, Keyword.t) :: doc | nil
   def find_one!(coll, doc, opts \\ []) do
     Mongo.find_one(:mongo, coll, doc, pool: DBConnection.Poolboy)
       |> doc_to_map()
@@ -62,10 +62,10 @@ defmodule Repo do
     end
   end
 
-  @spec update_one!(coll, map(), doc, Keyword.t) :: result!(Mongo.UpdateResult.t)
-  def update_one!(coll, filter, doc, opts \\ []), do: Mongo.update_one!(:mongo, coll, filter, %{"$set": Map.from_struct(doc)}, opts ++ [pool: DBConnection.Poolboy])
+  @spec update_one!(coll, map(), doc, Keyword.t) :: any()
+  def update_one!(coll, filter, doc, opts \\ []), do: Mongo.update_one!(:mongo, coll, filter, %{"$set": Map.delete(doc, :__struct__)}, opts ++ [pool: DBConnection.Poolboy])
 
-  @spec update_one(coll, map(), doc, Keyword.t) :: :ok | {:error, any()}
+  @spec update_one(coll, map(), doc, Keyword.t) :: {:ok, any()} | {:error, any()}
   def update_one(coll, filter, doc, opts \\ []) do
     case update_one!(coll, filter, doc, opts) do
       %UpdateResult{modified_count: 1} = res -> {:ok, res}

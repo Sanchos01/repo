@@ -12,19 +12,27 @@ defmodule Repo do
   @type result(t) :: :ok | {:ok, t} | {:error, Mongo.Error.t}
   @type result!(t) :: nil | t | no_return
 
-  @spec insert_one!(coll, doc) :: result!(Mongo.InsertOneResult.t)
-  def insert_one!(coll, doc), do: Mongo.insert_one!(:mongo, coll, doc, pool: DBConnection.Poolboy)
+  @spec insert_one!(coll, doc) :: any() | nil
+  def insert_one!(coll, doc) do
+    case Mongo.insert_one(:mongo, coll, doc, pool: DBConnection.Poolboy) do
+      {:ok, obj}        -> BSON.ObjectId.encode!(obj.inserted_id)
+      {:error, message} -> nil
+    end
+  end
 
   @spec insert_one(coll, doc) :: result(Mongo.InsertOneResult.t)
-  def insert_one(coll, doc), do: Mongo.insert_one(:mongo, coll, doc, pool: DBConnection.Poolboy)
+  def insert_one(coll, doc) do
+    case insert_one!(coll, doc) do
+      nil -> {:error, nil}
+      id  -> {:ok, id}
+    end
+  end
 
   @spec find_one(coll, doc, Keyword.t) :: nil | doc
   def find_one!(coll, doc, opts \\ []) do
-    if struct = opts[:as] do
-      DataHelper.struct_from_map(Mongo.find_one(:mongo, coll, doc, pool: DBConnection.Poolboy), as: struct)
-    else
-      Mongo.find_one(:mongo, coll, doc, pool: DBConnection.Poolboy) |> doc_to_map()
-    end
+    Mongo.find_one(:mongo, coll, doc, pool: DBConnection.Poolboy)
+      |> doc_to_map()
+      |> (fn x -> if struct = opts[:as], do: DataHelper.struct_from_map(x, as: struct), else: x end).()
   end
 
   @spec find_one(coll, doc, Keyword.t) :: {:ok, doc} | {:error, nil}
@@ -32,11 +40,10 @@ defmodule Repo do
 
   @spec find(coll, doc, Keyword.t) :: [] | [...]
   def find(coll, doc, opts \\ []) do
-    if struct = opts[:as] do
-      DataHelper.struct_from_map(Mongo.find(:mongo, coll, doc, pool: DBConnection.Poolboy) |> Enum.to_list(), as: struct)
-    else
-      Mongo.find(:mongo, coll, doc, pool: DBConnection.Poolboy) |> Enum.to_list() |> Enum.map(&doc_to_map/1)
-    end
+    Mongo.find(:mongo, coll, doc, pool: DBConnection.Poolboy)
+      |> Enum.to_list()
+      |> Enum.map(&doc_to_map/1)
+      |> (fn x -> if struct = opts[:as], do: DataHelper.struct_from_map(x, as: struct), else: x end).()
   end
 
   @spec delete_one!(coll, doc) :: :ok | Exception.t
@@ -55,14 +62,14 @@ defmodule Repo do
     end
   end
 
-  @spec update_one!(coll, map(), doc) :: result!(Mongo.UpdateResult.t)
-  def update_one!(coll, filter, doc), do: Mongo.update_one!(:mongo, coll, filter, %{"$set": doc}, pool: DBConnection.Poolboy)
+  @spec update_one!(coll, map(), doc, Keyword.t) :: result!(Mongo.UpdateResult.t)
+  def update_one!(coll, filter, doc, opts \\ []), do: Mongo.update_one!(:mongo, coll, filter, %{"$set": Map.from_struct(doc)}, opts ++ [pool: DBConnection.Poolboy])
 
-  @spec update_one(coll, map(), doc) :: :ok | {:error, any()}
-  def update_one(coll, filter, doc) do
-    case update_one!(coll, filter, doc) do
-      %UpdateResult{modified_count: 1} -> :ok
-      some                             -> {:error, some}
+  @spec update_one(coll, map(), doc, Keyword.t) :: :ok | {:error, any()}
+  def update_one(coll, filter, doc, opts \\ []) do
+    case update_one!(coll, filter, doc, opts) do
+      %UpdateResult{modified_count: 1} = res -> {:ok, res}
+      some                                   -> {:error, some}
     end
   end
 

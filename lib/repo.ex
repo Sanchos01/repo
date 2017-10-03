@@ -62,6 +62,22 @@ defmodule Repo do
     end
   end
 
+  @spec delete_many!(coll, doc) :: :ok | Exception.t
+  def delete_many!(coll, doc) do
+    case Repo.delete_many(coll, doc) do
+      :ok -> :ok
+      _   -> raise "Can't delete #{inspect doc} from #{inspect coll}"
+    end
+  end
+
+  @spec delete_many(coll, doc) :: :ok | {:error, any()}
+  def delete_many(coll, doc) do
+    case Mongo.delete_many!(:mongo, coll, doc, pool: DBConnection.Poolboy) do
+      %DeleteResult{deleted_count: x} when x > 0 -> {:ok, x}
+      some                                       -> {:error, some}
+    end
+  end
+
   @spec update_one!(coll, map(), doc, Keyword.t) :: any()
   def update_one!(coll, filter, doc, opts \\ []), do: Mongo.update_one!(:mongo, coll, filter, %{"$set": Map.delete(doc, :__struct__)}, opts ++ [pool: DBConnection.Poolboy])
 

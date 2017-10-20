@@ -32,7 +32,7 @@ defmodule Repo do
   def find_one!(coll, doc, opts \\ []) do
     Mongo.find_one(:mongo, coll, doc, pool: DBConnection.Poolboy)
       |> doc_to_map()
-      |> (fn x -> if struct = opts[:as], do: DataHelper.struct_from_map(x, as: struct), else: x end).()
+      |> (fn x -> if struct = opts[:as], do: DataHelper.struct_from_map(x, struct), else: x end).()
   end
 
   @spec find_one(coll, doc, Keyword.t) :: {:ok, doc} | {:error, nil}
@@ -43,7 +43,7 @@ defmodule Repo do
     Mongo.find(:mongo, coll, doc, pool: DBConnection.Poolboy)
       |> Enum.to_list()
       |> Enum.map(&doc_to_map/1)
-      |> (fn x -> if struct = opts[:as], do: DataHelper.struct_from_map(x, as: struct), else: x end).()
+      |> (fn x -> if struct = opts[:as], do: DataHelper.struct_from_map(x, struct), else: x end).()
   end
 
   @spec delete_one!(coll, doc) :: :ok | Exception.t

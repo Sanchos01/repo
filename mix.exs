@@ -21,8 +21,8 @@ defmodule Repo.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:mongodb, ">= 0.0.0"},
-      {:poolboy, ">= 0.0.0"},
+      {:mongodb, "~> 0.4.3"},
+      {:poolboy, "~> 1.5.1"},
       {:timex, "~> 3.1"},
     ]
   end

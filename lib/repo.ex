@@ -1,5 +1,6 @@
 defmodule Repo do
   alias Mongo.{DeleteResult, UpdateResult}
+  alias Repo.DataHelper
   @moduledoc ~S"""
   Simple implementation Mongo-driver.
   Set in your supervisor:

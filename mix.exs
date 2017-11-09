@@ -21,7 +21,7 @@ defmodule Repo.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:mongodb, github: "Sanchos01/mongodb"},
+      {:mongodb, "~> 0.4.3"},
       {:poolboy, "~> 1.5.1"},
       {:timex, "~> 3.1"},
     ]

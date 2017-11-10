@@ -106,7 +106,7 @@ defmodule Repo do
   def count(coll, filter, opts \\ []), do: Mongo.count(:mongo, coll, filter, opts ++ [pool: DBConnection.Poolboy])
 
   @spec aggregate(coll, list(), Keyword.t) :: any()
-  def aggregate(coll, pipeline, opts \\ []), do: Mongo.aggregate(:mongo, coll, pipeline, opts ++ [pool: DBConnection.Poolboy])
+  def aggregate(coll, pipeline, opts \\ []), do: Mongo.aggregate(:mongo, coll, pipeline, opts ++ [pool: DBConnection.Poolboy]) |> Enum.to_list()
 
 ###############################################
 

@@ -105,6 +105,9 @@ defmodule Repo do
   @spec count(coll, map(), Keyword.t) :: any()
   def count(coll, filter, opts \\ []), do: Mongo.count(:mongo, coll, filter, opts ++ [pool: DBConnection.Poolboy])
 
+  @spec aggregate(coll, list(), Keyword.t) :: any()
+  def aggregate(coll, pipeline, opts \\ []), do: Mongo.aggregate(:mongo, coll, pipeline, opts ++ [pool: DBConnection.Poolboy])
+
 ###############################################
 
   def doc_to_map(doc) when is_map(doc), do: Map.put(doc, "id", BSON.ObjectId.encode!(doc["_id"])) |> Map.delete("_id")

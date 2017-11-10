@@ -90,6 +90,18 @@ defmodule Repo do
     end
   end
 
+  @spec update_many!(coll, map(), doc, Keyword.t) :: any()
+  def update_many!(coll, filter, doc, opts \\ []), do: Mongo.update_many!(:mongo, coll, filter, %{"$set": Map.delete(doc, :__struct__)}, opts ++ [pool: DBConnection.Poolboy])
+
+  @spec update_many(coll, map(), doc, Keyword.t) :: {:ok, any()} | {:error, any()}
+  def update_many(coll, filter, doc, opts \\ []) do
+    case update_many!(coll, filter, doc, opts) do
+      %UpdateResult{modified_count: 0} = res -> {:error, res}
+      %UpdateResult{} = res                  -> {:ok, res}
+      some                                   -> {:error, some}
+    end
+  end
+
   @spec count(coll, map(), Keyword.t) :: any()
   def count(coll, filter, opts \\ []), do: Mongo.count(:mongo, coll, filter, opts ++ [pool: DBConnection.Poolboy])
 

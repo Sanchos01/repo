@@ -90,6 +90,9 @@ defmodule Repo do
     end
   end
 
+  @spec count(coll, map(), Keyword.t) :: any()
+  def count(coll, filter, opts \\ []), do: Mongo.count(:mongo, coll, filter, opts ++ [pool: DBConnection.Poolboy])
+
 ###############################################
 
   def doc_to_map(doc) when is_map(doc), do: Map.put(doc, "id", BSON.ObjectId.encode!(doc["_id"])) |> Map.delete("_id")

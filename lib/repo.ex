@@ -31,7 +31,7 @@ defmodule Repo do
 
   @spec find_one(coll, doc, Keyword.t) :: doc | nil
   def find_one!(coll, doc, opts \\ []) do
-    Mongo.find_one(:mongo, coll, doc, pool: DBConnection.Poolboy)
+    Mongo.find_one(:mongo, coll, doc, [{:pool, DBConnection.Poolboy}|opts])
       |> doc_to_map()
       |> (fn x -> if struct = opts[:as], do: DataHelper.struct_from_map(x, struct), else: x end).()
   end
@@ -41,7 +41,7 @@ defmodule Repo do
 
   @spec find(coll, doc, Keyword.t) :: [] | [...]
   def find(coll, doc, opts \\ []) do
-    Mongo.find(:mongo, coll, doc, pool: DBConnection.Poolboy)
+    Mongo.find(:mongo, coll, doc, [{:pool, DBConnection.Poolboy}|opts])
       |> Enum.to_list()
       |> Enum.map(&doc_to_map/1)
       |> (fn x -> if struct = opts[:as], do: DataHelper.struct_from_map(x, struct), else: x end).()
@@ -80,7 +80,7 @@ defmodule Repo do
   end
 
   @spec update_one!(coll, map(), doc, Keyword.t) :: any()
-  def update_one!(coll, filter, doc, opts \\ []), do: Mongo.update_one!(:mongo, coll, filter, %{"$set": Map.delete(doc, :__struct__)}, opts ++ [pool: DBConnection.Poolboy])
+  def update_one!(coll, filter, doc, opts \\ []), do: Mongo.update_one!(:mongo, coll, filter, %{"$set": Map.delete(doc, :__struct__)}, [{:pool, DBConnection.Poolboy}|opts])
 
   @spec update_one(coll, map(), doc, Keyword.t) :: {:ok, any()} | {:error, any()}
   def update_one(coll, filter, doc, opts \\ []) do
@@ -91,7 +91,7 @@ defmodule Repo do
   end
 
   @spec update_many!(coll, map(), doc, Keyword.t) :: any()
-  def update_many!(coll, filter, doc, opts \\ []), do: Mongo.update_many!(:mongo, coll, filter, %{"$set": Map.delete(doc, :__struct__)}, opts ++ [pool: DBConnection.Poolboy])
+  def update_many!(coll, filter, doc, opts \\ []), do: Mongo.update_many!(:mongo, coll, filter, %{"$set": Map.delete(doc, :__struct__)}, [{:pool, DBConnection.Poolboy}|opts])
 
   @spec update_many(coll, map(), doc, Keyword.t) :: {:ok, any()} | {:error, any()}
   def update_many(coll, filter, doc, opts \\ []) do
@@ -103,11 +103,12 @@ defmodule Repo do
   end
 
   @spec count(coll, map(), Keyword.t) :: any()
-  def count(coll, filter, opts \\ []), do: Mongo.count(:mongo, coll, filter, opts ++ [pool: DBConnection.Poolboy])
+  def count(coll, filter, opts \\ []), do: Mongo.count(:mongo, coll, filter, [{:pool, DBConnection.Poolboy}|opts])
 
   @spec aggregate(coll, list(), Keyword.t) :: any()
   def aggregate(coll, pipeline, opts \\ []) do
-    Mongo.aggregate(:mongo, coll, pipeline, opts ++ [pool: DBConnection.Poolboy]) |> Enum.to_list()
+    Mongo.aggregate(:mongo, coll, pipeline, [{:pool, DBConnection.Poolboy}|opts])
+      |> Enum.to_list()
       |> doc_to_map()
   end
 

@@ -114,7 +114,7 @@ defmodule Repo do
 
 ###############################################
 
-  def doc_to_map(doc) when is_map(doc), do: Map.put(doc, "id", BSON.ObjectId.encode!(doc["_id"])) |> Map.delete("_id")
+  def doc_to_map(doc = %{"_id" => id}), do: Map.put(doc, "id", BSON.ObjectId.encode!(id)) |> Map.delete("_id")
   def doc_to_map(list) when is_list(list), do: Enum.map(list, fn x -> doc_to_map(x) end)
   def doc_to_map(some), do: some
 
